@@ -22,6 +22,7 @@ namespace sg14 {
 			namespace arithmetic {
 				struct lean_tag;
 				struct raw_tag;
+				struct wide_tag;
 	
 				//sg14::impl::fp::arithmetic::binary_pair
 				template<class LhsRep,int LhsExponent,class RhsRep,int RhsExponent>
@@ -54,6 +55,15 @@ namespace sg14 {
 				template<class Lhs,class Rhs>
 				struct rep_op_exponent<_impl::add_op,Lhs,Rhs> : public std::integral_constant<int,_impl::min<int>(Lhs::exponent,Rhs::exponent) > {};
 
+				template<class Lhs,class Rhs>
+				struct rep_op_exponent<_impl::subtract_op,Lhs,Rhs> : public std::integral_constant<int,_impl::min<int>(Lhs::exponent,Rhs::exponent) > {};
+
+				template<class Lhs,class Rhs>
+				struct rep_op_exponent<_impl::multiply_op,Lhs,Rhs> : public std::integral_constant<int,Lhs::exponent + Rhs::exponent> {};
+				
+				template<class Lhs,class Rhs>
+				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,Lhs::exponent + Rhs::exponent> {};
+
 				// sg14::_impl::fp::arithmetic::result
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
 				struct result;
@@ -73,6 +83,29 @@ namespace sg14 {
 				template <class OperationTag,class Lhs,class Rhs>
 				struct result<lean_tag,OperationTag,Lhs,Rhs> : result<raw_tag,OperationTag,Lhs,Rhs>{};
 
+				template<class Lhs,class Rhs>
+				struct result<wide_tag,_impl::divide_op,Lhs,Rhs> {
+					using lhs_rep = typename Lhs::rep;
+					using rhs_rep = typename Rhs::rep;
+					using rep_op_result = _impl::op_result<_impl::multiply_op,lhs_rep,rhs_rep>;
+
+					static constexpr int integer_digits = Lhs::integer_digits + Rhs::fractional_digits;
+					static constexpr int fractional_digits = Lhs::fractional_digits + Rhs::integer_digits;
+					static constexpr int necessary_digits = integer_digits + fractional_digits;
+					static constexpr bool is_signed = std::numeric_limits<lhs_rep>::is_signed || std::numeric_limits<rhs_rep>::is_signed;
+
+					static constexpr int promotion_digits = digits<rep_op_result>::value;
+					static constexpr int digits = _impl::max(necessary_digits,promotion_digits);
+
+					using prewidened_result_rep = _impl::make_signed_t<rep_op_result,is_signed>;
+					using rep_type = set_digits_t<prewidened_result_rep,digits>;
+					static constexpr int rep_exponent = -fractional_digits;
+
+					using type = fixed_point<rep_type,rep_exponent>;
+				};
+			
+
+
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
 				struct intermediate;
 
@@ -84,8 +117,24 @@ namespace sg14 {
 					using rhs_type = lhs_type;
 				};
 
+				
+				template<class Lhs,class Rhs>
+				struct intermediate<lean_tag,_impl::multiply_op,Lhs,Rhs> {
+					using lhs_type = Lhs;
+					using rhs_type = Rhs;
+				};
 
+				
+				template<class Lhs,class Rhs>
+				struct intermediate<wide_tag,_impl::divide_op,Lhs,Rhs> {
+					using wide_result = result<wide_tag,_impl::divide_op,Lhs,Rhs>;
+					using rep_type = typename wide_result::rep_type;
 
+					static constexpr int exponent = Lhs::exponent-Rhs::digits;
+					using lhs_type = fixed_point<rep_type,exponent>;
+					using rhs_type = Rhs;
+				};
+					
 
 				//sg14::_impl::fp:arithmetic::operator_params	
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
@@ -108,6 +157,7 @@ namespace sg14 {
 			// mappings from name function stragies to public API
 			// strategy aliases for ease of flip-flopping
 			using arithmetic_operator_tag = arithmetic::lean_tag;
+			using division_arithmetic_operator_tag = arithmetic::wide_tag;
 
 			template <class PolicyTag, class Operation,class Lhs,class Rhs>
 			const auto operate(const Lhs& lhs,const Rhs& rhs,Operation) 

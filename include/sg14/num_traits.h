@@ -11,6 +11,8 @@
 #define SG14_NUMERIC_TRAITS 1
 
 #include <utility>
+#include <bits/limits.h>
+#include <bits/type_traits.h>
 
 
 namespace sg14 {
@@ -37,6 +39,70 @@ namespace sg14 {
 		scale_result_type<T> pow(int base,int exp) {
 			return (base == 2) ? pow2<T>(exp) : pown<T>(base,exp);
 		}
+
+		template<_digits_type MinNumDigits,class Smaller,class T>
+		struct enable_for_range : std::enable_if<MinNumDigits <= std::numeric_limits<T>::digits && 
+					std::numeric_limits<Smaller>::digits < MinNumDigits> {};
+
+		template<_digits_type MinNumDigits,class Smallest>
+		struct enable_for_range<MinNumDigits,void ,Smallest> : std::enable_if<MinNumDigits <= std::numeric_limits<Smallest>::digits> {};
+
+		template<_digits_type MinNumDigits,class Smaller,class T>
+		using enable_for_range_t = typename enable_for_range<MinNumDigits,Smaller,T>::type;
+
+		//sg14::_num_traits_impl::set_digits_signed
+		template<_digits_type MinNumDigits,class Enable = void>
+		struct set_digits_signed;
+
+		template<_digits_type MinNumDigits>
+		struct set_digits_signed<MinNumDigits,enable_for_range_t<MinNumDigits,void,std::int8_t>> {
+			using type = std::int8_t;
+		};
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_signed<MinNumDigits, enable_for_range_t<MinNumDigits, std::int8_t, std::int16_t>> {
+            using type = std::int16_t;
+        };
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_signed<MinNumDigits, enable_for_range_t<MinNumDigits, std::int16_t, std::int32_t>> {
+            using type = std::int32_t;
+        };
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_signed<MinNumDigits, enable_for_range_t<MinNumDigits, std::int32_t, std::int64_t>> {
+            using type = std::int64_t;
+		};
+
+        template<_digits_type MinNumDigits, class Enable = void>
+        struct set_digits_unsigned;
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_unsigned<MinNumDigits, enable_for_range_t<MinNumDigits, void, std::uint8_t>> {
+            using type = std::uint8_t;
+        };
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_unsigned<MinNumDigits, enable_for_range_t<MinNumDigits, std::uint8_t, std::uint16_t>> {
+            using type = std::uint16_t;
+        };
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_unsigned<MinNumDigits, enable_for_range_t<MinNumDigits, std::uint16_t, std::uint32_t>> {
+            using type = std::uint32_t;
+        };
+
+        template<_digits_type MinNumDigits>
+        struct set_digits_unsigned<MinNumDigits, enable_for_range_t<MinNumDigits, std::uint32_t, std::uint64_t>> {
+            using type = std::uint64_t;
+        };
+
+		template<class Integer,_digits_type MinNumDigits>
+		using set_digits_integer = typename std::conditional<
+		std::numeric_limits<Integer>::is_signed,
+		set_digits_signed<MinNumDigits>,
+		set_digits_unsigned<MinNumDigits> >::type;
+		
 	}
 
 	// digits
@@ -54,13 +120,40 @@ namespace sg14 {
 		}
 	};
 
+	template<class T,_digits_type Digits,class Enable = void>
+	struct set_digits;
+
+	template<class T,_digits_type Digits>
+	struct set_digits<T,Digits,_impl::enable_if_t<std::is_integral<T>::value>> :
+	 _num_traits_impl::set_digits_integer<T,Digits> {};
+
+	template<class T,_digits_type Digits>
+	using set_digits_t = typename set_digits<T,Digits>::type;
+
+	template<class,class = void>
+	struct make_signed;
+
+	template<class T>
+	struct make_signed<T,_impl::enable_if_t<std::is_integral<T>::value>> : std::make_signed<T> {};
+
+	template<class T>
+	using make_signed_t = typename make_signed<T>::type;
+
+	template<class, class = void>
+	struct make_unsigned;
+
+	template<class T>
+	struct make_unsigned<T,_impl::enable_if_t<std::is_integral<T>::value>> : std::make_unsigned<T> { };
+
+	template<class T>
+	using make_unsigned_t = typename make_unsigned<T>::type;
+
 	namespace _impl {
 		template <class Number,class Rep>
 		const auto from_rep(const Rep& rep) -> decltype(sg14::from_rep<Number>()(rep)) {
 			return sg14::from_rep<Number>()(rep);
 		}
 	}
-
 
 	template<class Number,class Enable = void>
 	struct to_rep {
@@ -94,6 +187,20 @@ namespace sg14 {
 		auto scale(const T& i,int base,int exp) -> decltype(scale<T>()(i,base,exp)) {
 			return sg14::scale<T>()(i,base,exp);
 		}
+	}
+
+	namespace _impl {
+		template<class T,bool isSigned = true>
+		struct make_signed;
+
+		template<class T>
+		struct make_signed<T,true> : ::sg14::make_signed<T> {};
+
+		template<class T>
+		struct make_signed<T,false> : ::sg14::make_unsigned<T> {};
+
+		template<class T,bool isSigned>
+		using make_signed_t = typename make_signed<T,isSigned>::type;
 	}
 }
 

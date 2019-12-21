@@ -35,7 +35,31 @@ namespace sg14 {
 			}
 		};
 
-		static add_op add_tag {};
+		struct subtract_op : arithmetic_op {
+			template<class Lhs,class Rhs>
+			auto operator() (const Lhs& lhs,const Rhs& rhs) const -> decltype(lhs + rhs) {
+				return lhs - rhs;
+			}
+		};
+
+		struct multiply_op : arithmetic_op {
+			template<class Lhs,class Rhs>
+			auto operator() (const Lhs& lhs,const Rhs&rhs) const -> decltype(lhs + rhs) {
+				return lhs * rhs;
+			}
+		};
+		
+		struct divide_op : arithmetic_op {
+			template<class Lhs,class Rhs>
+			constexpr auto operator() (const Lhs& lhs,const Rhs& rhs) const -> decltype(lhs / rhs) {
+				return lhs / rhs;
+			}
+		};
+
+		constexpr static add_op add_tag {};
+		constexpr static subtract_op subtract_tag{};
+		constexpr static multiply_op multiply_tag{};
+		constexpr static divide_op divide_tag {};
 
 		//sg14::_impl::rep_op_result
 		template<class Operator,class Lhs,class Rhs>

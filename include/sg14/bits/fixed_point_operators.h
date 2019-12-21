@@ -21,6 +21,27 @@ namespace sg14 {
 	-> decltype(_impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs,rhs,_impl::add_tag)) {
 		return _impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs, rhs, _impl::add_tag);
 	}
+
+	//subtract
+	template <class LhsRep,int LhsExponent,class RhsRep,int RhsExponent>
+	auto operator - (const fixed_point<LhsRep,LhsExponent>&lhs,const fixed_point<RhsRep,RhsExponent>& rhs)
+	-> decltype(_impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs,rhs,_impl::subtract_tag)) {
+			return _impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs,rhs,_impl::subtract_tag);
+	}
+
+	//multiply
+	template <class LhsRep,int LhsExponent,class RhsRep,int RhsExponent>
+	auto operator * (const fixed_point<LhsRep,LhsExponent>& lhs,const fixed_point<RhsRep,RhsExponent>&rhs) 
+	-> decltype(_impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs,rhs,_impl::multiply_tag)) {
+			return _impl::fp::operate<_impl::fp::arithmetic_operator_tag>(lhs,rhs,_impl::multiply_tag);
+	}
+
+	// divide
+	template<class LhsRep,int LhsExponent,class RhsRep,int RhsExponent>
+	auto operator / (const fixed_point<LhsRep,LhsExponent>& lhs,const fixed_point<RhsRep,RhsExponent>& rhs)
+	-> decltype(_impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::divide_tag)) {
+		return _impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::divide_tag);
+	}
 }
 
 #endif
