@@ -82,20 +82,41 @@ namespace sg14 {
 			return fixed_point(r,0);
 		}
 
+		/// copy assignment operator taking an integer type
+		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy = 0>
+		fixed_point& operator = (S s) {
+			return operator = (fixed_point<S,0>::from_data(s));
+		}
+
+		/// copy assignment operator taking from a float-type
+		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
+		fixed_point& operator = (S s) {
+			_base::operator=(floating_point_to_rep(s));
+			return *this;
+		}
 		
-		//constructor from a float-type
+		///constructor from a float-type
 		template <class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
 		fixed_point(S s) : _base(floating_point_to_rep(s)) {}
 
-		//returns value represented as floating-point
+		///returns value represented as floating-point
 		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
 		explicit constexpr operator S() const {
 			return rep_to_floating_point<S>(_base::data());
+		}
+		
+		///returns value represented as integral
+		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy = 0>
+		constexpr operator S() const {
+			return rep_to_integral<S>(_base::data());
 		}
 	
 	private :
 		template <class FromRep,int FromExponent>
 		static rep fixed_point_to_rep(const fixed_point<FromRep,FromExponent>& rhs);
+		
+		template<class S>
+		static S rep_to_integral(rep r);
 
 		template <class S>
 		static rep floating_point_to_rep(S s);
@@ -180,6 +201,13 @@ namespace sg14 {
 	typename fixed_point<Rep,Exponent>::rep fixed_point<Rep,Exponent>::floating_point_to_rep(S s) {
 		static_assert(std::numeric_limits<S>::is_iec559, "S must be floating-point type");
 		return static_cast<rep>(s * one<S>());
+	}
+
+	template<class Rep,int Exponent>
+	template<class S>
+	S fixed_point<Rep,Exponent>::rep_to_integral(rep r) {
+		static_assert(std::numeric_limits<S>::is_integer,"S must be integral type");
+		return _impl::shift_left<exponent,S>(r);
 	}
 
 	template<class Rep,int Exponent>

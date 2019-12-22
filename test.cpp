@@ -9,8 +9,11 @@ int main() {
 	std::cout << y.data() << std::endl;
 	std::cout << z.data() << std::endl;
 	
-	auto res = y / z;
-	std::cout << res.data() << std::endl;
-	std::cout << res << std::endl;
+	y = z + 2;
+	y -= 2;
+	y *= 2;
+	y /= 2;
+
+	std::cout << y << std::endl;
 	return 0;
 }
