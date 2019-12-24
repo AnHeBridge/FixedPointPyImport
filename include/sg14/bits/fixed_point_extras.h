@@ -31,6 +31,20 @@ namespace sg14 {
 		fp = ld;
 		return in;
 	}
+
+    template<class Rep, int Exponent>
+        struct digits<fixed_point<Rep, Exponent>> : digits<Rep> {
+    };
+
+    template<class Rep, int Exponent, _digits_type MinNumBits>
+    struct set_digits<fixed_point<Rep, Exponent>, MinNumBits> {
+        using type = fixed_point<set_digits_t<Rep, MinNumBits>, Exponent>;
+    };
+
+    template<class Rep, int Exponent, class Value>
+    struct from_value<fixed_point<Rep, Exponent>, Value> {
+        using type = fixed_point<Value>;
+	};
 }
 
 

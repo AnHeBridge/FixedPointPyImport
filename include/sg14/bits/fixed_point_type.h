@@ -68,53 +68,98 @@ namespace sg14 {
 		fixed_point(rep r,int) : _base(r) { }
 	
 	public :
-		// default constructor
-		fixed_point() : _base() {}
+        /// default constructor
+        constexpr fixed_point() : _base() { }
 
-		// constructor taking a fixed-point type
-		template <class FromRep,int FromExponent>
-		fixed_point(const fixed_point<FromRep,FromExponent>& rhs) : _base(fixed_point_to_rep(rhs)) { }
-		
-		template <class S, _impl::enable_if_t<std::numeric_limits<S>::is_integer,int> Dummy = 0>
-		fixed_point(const S& s) : fixed_point(fixed_point<S,0>::from_data(s)) {}
+        /// constructor taking a fixed-point type
+        template<class FromRep, int FromExponent>
+        constexpr fixed_point(const fixed_point<FromRep, FromExponent>& rhs)
+                : _base(fixed_point_to_rep(rhs))
+        {
+        }
 
-		static fixed_point from_data(rep const& r) {
-			return fixed_point(r,0);
-		}
+        /// constructor taking an integral_constant type
+        template<class Integral, Integral Constant>
+        constexpr fixed_point(const std::integral_constant<Integral, Constant>&)
+                : fixed_point(fixed_point<Integral, 0>::from_data(Constant))
+        {
+        }
 
-		/// copy assignment operator taking an integer type
-		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy = 0>
-		fixed_point& operator = (S s) {
-			return operator = (fixed_point<S,0>::from_data(s));
-		}
+        /// constructor taking an integer type
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_integer, int> Dummy = 0>
+        constexpr fixed_point(const S& s)
+            : fixed_point(fixed_point<S, 0>::from_data(s))
+        {
+        }
 
-		/// copy assignment operator taking from a float-type
-		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
-		fixed_point& operator = (S s) {
-			_base::operator=(floating_point_to_rep(s));
-			return *this;
-		}
-		
-		///constructor from a float-type
-		template <class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
-		fixed_point(S s) : _base(floating_point_to_rep(s)) {}
+        /// constructor taking an integral_constant type
+        ///template<class Integral, Integral Value, int Digits>
+        ///constexpr fixed_point(const_integer<Integral, Value, Digits, Exponent> ci)
+        ///    : _base(ci << Exponent)
+        ///{
+        ///}
 
-		///returns value represented as floating-point
-		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
-		explicit constexpr operator S() const {
-			return rep_to_floating_point<S>(_base::data());
-		}
-		
-		///returns value represented as integral
-		template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy = 0>
-		constexpr operator S() const {
-			return rep_to_integral<S>(_base::data());
-		}
+        /// constructor taking a floating-point type
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_iec559, int> Dummy = 0>
+        constexpr fixed_point(S s)
+                :_base(floating_point_to_rep(s))
+        {
+        }
+
+        /// copy assignment operator taking an integer type
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_integer, int> Dummy = 0>
+        fixed_point& operator=(S s)
+        {
+            return operator=(fixed_point<S, 0>::from_data(s));
+        }
+
+        /// copy assignment operator taking a floating-point type
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_iec559, int> Dummy = 0>
+        fixed_point& operator=(S s)
+        {
+            _base::operator=(floating_point_to_rep(s));
+            return *this;
+        }
+
+        /// copy assignement operator taking a fixed-point type
+        template<class FromRep, int FromExponent>
+        fixed_point& operator=(const fixed_point<FromRep, FromExponent>& rhs)
+        {
+            _base::operator=(fixed_point_to_rep(rhs));
+            return *this;
+        }
+
+        /// returns value represented as bool
+        template<typename R = Rep>
+        constexpr operator typename std::enable_if<std::is_convertible<Rep, bool>::value, bool>() const
+        {
+            return static_cast<bool>(_base::data());
+        }
+
+        /// returns value represented as integral
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_integer, int> Dummy = 0>
+        constexpr operator S() const
+        {
+            return rep_to_integral<S>(_base::data());
+        }
+
+        /// returns value represented as floating-point
+        template<class S, _impl::enable_if_t<std::numeric_limits<S>::is_iec559, int> Dummy = 0>
+        explicit constexpr operator S() const
+        {
+            return rep_to_floating_point<S>(_base::data());
+        }
+
+        /// creates an instance given the underlying representation value
+        static constexpr fixed_point from_data(rep const & r)
+        {
+            return fixed_point(r, 0);
+        }
 	
 	private :
 		template <class FromRep,int FromExponent>
 		static rep fixed_point_to_rep(const fixed_point<FromRep,FromExponent>& rhs);
-		
+
 		template<class S>
 		static S rep_to_integral(rep r);
 
@@ -125,6 +170,9 @@ namespace sg14 {
 		static S rep_to_floating_point(rep r);
 
 		template <class S,_impl::enable_if_t<std::numeric_limits<S>::is_iec559,int>Dummy = 0>
+		static S one();
+
+		template <class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy = 0>
 		static S one();
 
 		template <class S>
@@ -222,6 +270,12 @@ namespace sg14 {
 	S fixed_point<Rep,Exponent>::one() {
 		auto result = _impl::fp::type::pow2<S,-exponent>();
 		return result;
+	}
+
+	template<class Rep,int Exponent>
+	template<class S,_impl::enable_if_t<std::numeric_limits<S>::is_integer,int>Dummy>
+	S fixed_point<Rep,Exponent>::one() {
+		return 0;
 	}
 
 	template<class Rep,int Exponent>
