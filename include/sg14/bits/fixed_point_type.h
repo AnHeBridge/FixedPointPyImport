@@ -16,7 +16,7 @@
 // study group 14 of the c++ working group
 namespace sg14 {
 	// forward declaration
-	template <class Rep = int, int Exponent = 0>
+	template <class Rep = int64_t, int Exponent = -32>
 	class fixed_point;
 
 	// implementation-specific definitions
@@ -217,7 +217,7 @@ namespace sg14 {
 				template <class S,int Exponent,enable_if_t<(Exponent >= 8),int>Dummy = 0>
 				S pow2() {
 					static_assert(std::numeric_limits<S>::is_iec559, "S must be floating-point type");
-					return pow2<S,Exponent - 8> * S(256);
+					return pow2<S,Exponent - 8>() * S(256);
 				}
 
 

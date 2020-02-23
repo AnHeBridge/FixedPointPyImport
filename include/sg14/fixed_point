@@ -16,5 +16,6 @@
 //#include "bits/fixed_point_common_type.h"
 #include "bits/fixed_point_operators.h"
 #include "bits/fixed_point_extras.h"
+#include "bits/number_split.h"
 
 #endif

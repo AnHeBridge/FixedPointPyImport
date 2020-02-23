@@ -52,6 +52,12 @@ namespace sg14 {
 				template<class OperationTag, class ... Operands>
 				struct rep_op_exponent;
 
+                template<class Rhs>
+                struct rep_op_exponent<_impl::plus_op, Rhs> : public std::integral_constant<int, Rhs::exponent> {};
+
+                template<class Rhs>
+                struct rep_op_exponent<_impl::minus_op, Rhs> : public std::integral_constant<int, Rhs::exponent> {};
+
 				template<class Lhs,class Rhs>
 				struct rep_op_exponent<_impl::add_op,Lhs,Rhs> : public std::integral_constant<int,_impl::min<int>(Lhs::exponent,Rhs::exponent) > {};
 
@@ -59,10 +65,10 @@ namespace sg14 {
 				struct rep_op_exponent<_impl::subtract_op,Lhs,Rhs> : public std::integral_constant<int,_impl::min<int>(Lhs::exponent,Rhs::exponent) > {};
 
 				template<class Lhs,class Rhs>
-				struct rep_op_exponent<_impl::multiply_op,Lhs,Rhs> : public std::integral_constant<int,Lhs::exponent + Rhs::exponent> {};
+				struct rep_op_exponent<_impl::multiply_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(lhs::exponent , Rhs::exponent)> {};
 				
 				template<class Lhs,class Rhs>
-				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,Lhs::exponent + Rhs::exponent> {};
+				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent + Rhs::exponent)> {};
 
 				// sg14::_impl::fp::arithmetic::result
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
