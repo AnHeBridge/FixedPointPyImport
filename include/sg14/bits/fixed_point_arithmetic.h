@@ -65,10 +65,10 @@ namespace sg14 {
 				struct rep_op_exponent<_impl::subtract_op,Lhs,Rhs> : public std::integral_constant<int,_impl::min<int>(Lhs::exponent,Rhs::exponent) > {};
 
 				template<class Lhs,class Rhs>
-				struct rep_op_exponent<_impl::multiply_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(lhs::exponent , Rhs::exponent)> {};
+				struct rep_op_exponent<_impl::multiply_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent , Rhs::exponent)> {};
 				
 				template<class Lhs,class Rhs>
-				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent + Rhs::exponent)> {};
+				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent,Rhs::exponent)> {};
 
 				// sg14::_impl::fp::arithmetic::result
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
@@ -86,8 +86,29 @@ namespace sg14 {
 					using type = fixed_point<rep_op_result,exponent>;
 				};
 
-				template <class OperationTag,class Lhs,class Rhs>
-				struct result<lean_tag,OperationTag,Lhs,Rhs> : result<raw_tag,OperationTag,Lhs,Rhs>{};
+                // result<lean_tag>
+                template<class OperationTag, class Lhs, class Rhs>
+                struct result<lean_tag, OperationTag, Lhs, Rhs> : result<raw_tag, OperationTag, Lhs, Rhs> {};
+
+                // result<wide_tag>
+                template<class OperationTag, class Lhs, class Rhs>
+                struct result<wide_tag, OperationTag, Lhs, Rhs> {
+                    using lhs_rep = typename Lhs::rep;
+                    using rhs_rep = typename Rhs::rep;
+                    using rep_op_result = _impl::op_result<OperationTag, lhs_rep, rhs_rep>;
+
+                    // 'Wide' doesn't guarantee avoiding overflow. Adding a single bit to add/subtract results would often lead to double the width being used.
+					// this part changed,do not double width bit,use number_split fix
+                    static constexpr int sufficient_sign_bits = std::is_signed<rep_op_result>::value;
+                    static constexpr int sufficient_integer_digits = _impl::max(Lhs::integer_digits,
+                            Rhs::integer_digits);
+                    static constexpr int sufficient_fractional_digits = _impl::max(Lhs::fractional_digits,
+                            Rhs::fractional_digits);
+                    static constexpr int result_digits = _impl::max(sufficient_fractional_digits, digits<rep_op_result>::value);
+
+                    using rep_type = set_digits_t<rep_op_result, result_digits>;
+                    using type = fixed_point<rep_type, -sufficient_fractional_digits>;
+                };
 
 				template<class Lhs,class Rhs>
 				struct result<wide_tag,_impl::divide_op,Lhs,Rhs> {
@@ -95,8 +116,8 @@ namespace sg14 {
 					using rhs_rep = typename Rhs::rep;
 					using rep_op_result = _impl::op_result<_impl::multiply_op,lhs_rep,rhs_rep>;
 
-					static constexpr int integer_digits = Lhs::integer_digits + Rhs::fractional_digits;
-					static constexpr int fractional_digits = Lhs::fractional_digits + Rhs::integer_digits;
+					static constexpr int integer_digits = _impl::max(Lhs::integer_digits,Rhs::fractional_digits);
+					static constexpr int fractional_digits = _impl::max(Lhs::fractional_digits,Rhs::integer_digits);
 					static constexpr int necessary_digits = integer_digits + fractional_digits;
 					static constexpr bool is_signed = std::numeric_limits<lhs_rep>::is_signed || std::numeric_limits<rhs_rep>::is_signed;
 
@@ -124,11 +145,11 @@ namespace sg14 {
 				};
 
 				
-				template<class Lhs,class Rhs>
-				struct intermediate<lean_tag,_impl::multiply_op,Lhs,Rhs> {
-					using lhs_type = Lhs;
-					using rhs_type = Rhs;
-				};
+				//template<class Lhs,class Rhs>
+				//struct intermediate<lean_tag,_impl::multiply_op,Lhs,Rhs> {
+				//	using lhs_type = Lhs;
+				//	using rhs_type = Rhs;
+				//};
 
 				
 				template<class Lhs,class Rhs>
@@ -175,11 +196,11 @@ namespace sg14 {
 				using result_rep = typename result_type::rep;
 
 				auto lhs_data_type = static_cast<intermediate_lhs>(lhs);
-				auto lhs_data = lhs_data_type.data();
+				auto lhs_data = lhs_data_type.rep_data();
 				auto rhs_data_type = static_cast<intermediate_rhs>(rhs);
-				auto rhs_data = rhs_data_type.data();
+				auto rhs_data = rhs_data_type.rep_data();
 
-				auto result_data = static_cast<result_rep>(Operation()(lhs_data,rhs_data));
+				auto result_data = static_cast<result_rep>(Operation()(lhs_data,rhs_data).get_data());
 
 				return result_type::from_data(result_data);
 			};

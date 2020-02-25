@@ -194,7 +194,6 @@ namespace sg14 {
 		template <int exp,class Output, class Input>
 		Output shift_left(Input i) {
 			using larger = typename std::conditional<digits<Input>::value <= digits<Output>::value,Output,Input> :: type;
-
 			return (exp >= -std::numeric_limits<larger>::digits) ? 
 				static_cast<Output>(_impl::scale<larger>(static_cast<larger>(i),2,exp)) :
 						Output{0};

@@ -33,25 +33,25 @@ namespace sg14 {
             //    return static_cast<Derived&>(*this);
             //}
 
-            explicit constexpr operator bool() const
-            {
+            explicit constexpr operator bool() const {
                 return static_cast<bool>(_rep);
             }
 
-            constexpr const rep data() const
-            {
+            constexpr const rep data() const {
                 return _rep.get_data();
             }
 
+			constexpr const number_split<Rep> rep_data() const {
+				return _rep;
+			}
+
 #if (__cplusplus >= 201402L)
-            constexpr rep data()
-            {
+            constexpr rep data() {
                 return _rep.get_data();
             }
 #endif
 
-            static constexpr Derived from_data(const rep& r)
-            {
+            static constexpr Derived from_data(const rep& r) {
                 return Derived(r);
             }
 

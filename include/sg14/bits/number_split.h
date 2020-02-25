@@ -62,7 +62,19 @@ namespace sg14 {
 
 		template<class Rep>
 		number_split<Rep> number_split<Rep>::operator *(const number_split<Rep>& rhs) const {
-			return 1;
+			Rep t0 = static_cast<Rep>(this->_low) * rhs._low;
+			Rep t1 = static_cast<Rep>(this->_high) * rhs._low;
+			Rep t2 = static_cast<Rep>(this->_low) * rhs._high;
+			Rep t3 = static_cast<Rep>(this->_high) * rhs._high;
+			
+			int digitval = std::numeric_limits<lowrep>::digits;
+			lowrep digitmax = std::numeric_limits<lowrep>::max();
+			Rep u1 = t1 + (t0 >> digitval);
+			Rep u2 = t2 + (u1 & digitmax);
+			Rep low = (u2 << digitval) | (t0 & digitmax);
+			Rep high = t3 + (u2 >> digitval) + (u1 >> digitval);
+			Rep result = ((high & digitmax) << digitval) | (low >> digitval);
+			return number_split<Rep>(result);
 		}
 			
 	//}
