@@ -116,18 +116,14 @@ namespace sg14 {
 					using rhs_rep = typename Rhs::rep;
 					using rep_op_result = _impl::op_result<_impl::multiply_op,lhs_rep,rhs_rep>;
 
-					static constexpr int integer_digits = _impl::max(Lhs::integer_digits,Rhs::fractional_digits);
-					static constexpr int fractional_digits = _impl::max(Lhs::fractional_digits,Rhs::integer_digits);
-					static constexpr int necessary_digits = integer_digits + fractional_digits;
+					static constexpr int lhs_digits = Lhs::integer_digits + Lhs::fractional_digits;
+					static constexpr int rhs_digits = Rhs::integer_digits + Rhs::fractional_digits;
 					static constexpr bool is_signed = std::numeric_limits<lhs_rep>::is_signed || std::numeric_limits<rhs_rep>::is_signed;
 
-					static constexpr int promotion_digits = digits<rep_op_result>::value;
-					static constexpr int digits = _impl::max(necessary_digits,promotion_digits);
-
+					static constexpr int digits = _impl::max(lhs_digits,rhs_digits);
 					using prewidened_result_rep = _impl::make_signed_t<rep_op_result,is_signed>;
 					using rep_type = set_digits_t<prewidened_result_rep,digits>;
-					static constexpr int rep_exponent = -fractional_digits;
-
+					static constexpr int rep_exponent = -_impl::max(Lhs::fractional_digits,Rhs::fractional_digits);
 					using type = fixed_point<rep_type,rep_exponent>;
 				};
 			
@@ -145,19 +141,12 @@ namespace sg14 {
 				};
 
 				
-				//template<class Lhs,class Rhs>
-				//struct intermediate<lean_tag,_impl::multiply_op,Lhs,Rhs> {
-				//	using lhs_type = Lhs;
-				//	using rhs_type = Rhs;
-				//};
-
-				
 				template<class Lhs,class Rhs>
 				struct intermediate<wide_tag,_impl::divide_op,Lhs,Rhs> {
 					using wide_result = result<wide_tag,_impl::divide_op,Lhs,Rhs>;
 					using rep_type = typename wide_result::rep_type;
 
-					static constexpr int exponent = Lhs::exponent-Rhs::digits;
+					static constexpr int exponent = _impl::min(Lhs::exponent,Rhs::exponent);
 					using lhs_type = fixed_point<rep_type,exponent>;
 					using rhs_type = Rhs;
 				};

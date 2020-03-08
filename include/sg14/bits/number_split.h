@@ -3,6 +3,7 @@
 //数字拆分为低位和高位 eg 64-32,32
 
 #include <sg14/num_traits.h>
+//#include <sg14/num_utils.h>
 
 namespace sg14 {
 	//namespace _impl {
@@ -23,6 +24,7 @@ namespace sg14 {
 			number_split operator + (const number_split& rhs) const;
 			number_split operator - (const number_split& rhs) const;
 			number_split operator * (const number_split& rhs) const;
+			number_split operator / (const number_split& rhs) const;
 			explicit constexpr operator bool() const;
 
 
@@ -47,10 +49,16 @@ namespace sg14 {
 			return static_cast<bool>(this->_low) || static_cast<bool>(this->_high);
 		}
 
-		//do not support not equal Rep operator temporarily 加上一个负数
+		//do not support not equal Rep operator 
 		template<class Rep>
 		number_split<Rep> number_split<Rep>::operator +(const number_split<Rep>& rhs) const {
 			Rep new_rep = (static_cast<Rep>(this->_high) << std::numeric_limits<lowrep>::digits) + (static_cast<Rep>(rhs._high) << std::numeric_limits<lowrep>::digits) + this->_low + rhs._low;
+			return number_split<Rep>(new_rep);
+		}
+
+		template<class Rep>
+		number_split<Rep> number_split<Rep>::operator / (const number_split<Rep>& rhs) const {
+			Rep new_rep = this->get_data() / rhs.get_data();
 			return number_split<Rep>(new_rep);
 		}
 

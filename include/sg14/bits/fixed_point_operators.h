@@ -79,8 +79,8 @@ namespace sg14 {
 
 	template<class LhsRep,int LhsExponent,class RhsInteger,typename = _impl::enable_if_t<std::numeric_limits<RhsInteger>::is_integer>>
 	constexpr auto operator / (const fixed_point<LhsRep,LhsExponent>&lhs,const RhsInteger& rhs)
-	-> decltype(lhs / fixed_point<LhsRep,LhsExponent>{rhs}) {
-		return lhs / fixed_point<LhsRep,LhsExponent>{rhs};
+	-> decltype(lhs / fixed_point<LhsRep,0>{rhs}) {
+		return lhs / fixed_point<LhsRep,0>{rhs};
 	}
 
 	// integer,fixed_point -> fixed_point
@@ -104,8 +104,8 @@ namespace sg14 {
 
 	template<class LhsInteger,class RhsRep,int RhsExponent,typename = _impl::enable_if_t<std::numeric_limits<LhsInteger>::is_integer>>
 	constexpr auto operator/(const LhsInteger& lhs,const fixed_point<RhsRep,RhsExponent>& rhs)
-	-> decltype(fixed_point<RhsRep, RhsExponent>{lhs} / rhs) {
-		return fixed_point<RhsRep, RhsExponent>{lhs} / rhs;
+	-> decltype(fixed_point<RhsRep,RhsExponent>{lhs} / fixed_point<RhsRep,0>{rhs}) {
+		return fixed_point<RhsRep, RhsExponent>{lhs} / fixed_point<RhsRep,0>{rhs};
 	}
 
 	// fixed-point, floating-point -> floating-point

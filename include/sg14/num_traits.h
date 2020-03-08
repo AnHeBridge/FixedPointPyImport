@@ -69,6 +69,11 @@ namespace sg14 {
                 : std::enable_if<MinNumDigits <= std::numeric_limits<Smallest>::digits> {
         };
 
+		template<_digits_type MinNumDigits, class Smallest>
+		struct enable_for_range<MinNumDigits, Smallest, void>
+			: std::enable_if<std::numeric_limits<Smallest>::digits >= MinNumDigits> {
+		};
+
         template<_digits_type MinNumDigits, class Smaller, class T>
         using enable_for_range_t = typename enable_for_range<MinNumDigits, Smaller, T>::type;
 
@@ -97,6 +102,8 @@ namespace sg14 {
         struct set_digits_signed<MinNumDigits, enable_for_range_t<MinNumDigits, std::int32_t, std::int64_t>> {
             using type = std::int64_t;
         };
+
+		
 
 #if defined(SG14_INT128_ENABLED)
         template<_digits_type MinNumDigits>
