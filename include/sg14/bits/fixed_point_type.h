@@ -22,7 +22,7 @@ namespace sg14 {
 	// implementation-specific definitions
 	namespace _impl {
 		namespace fp {
-			// sg14::_impl::float_of_size 暂时跳过
+			// sg14::_impl::float_of_size
 		}
 	}
 
@@ -182,6 +182,11 @@ namespace sg14 {
 	
 	namespace _impl {
 		// sg14::_impl::is_fixed_point
+		template<class T>
+		struct is_fixed_point : public std::false_type{};
+
+		template<class Rep,int Exponent>
+		struct is_fixed_point<fixed_point<Rep,Exponent>> : public std::true_type{};
 		
         ////////////////////////////////////////////////////////////////////////////////
         // sg14::_impl::shift_left

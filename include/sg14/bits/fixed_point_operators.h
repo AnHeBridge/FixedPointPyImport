@@ -53,8 +53,37 @@ namespace sg14 {
 		return _impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::divide_tag);
 	}
 
-	//TODO
+	////////////////////////////////////////////////////////////////////////////////
+	//// heterogeneous operator overloads
+	////
+	//// compare two objects of different fixed_point specializations
+	namespace _fixed_point_operators_impl {
+		template<class Lhs,class Rhs>
+		constexpr bool is_heterogeneous() {
+			return (!std::is_same<Lhs,Rhs>::value) &&
+				(_impl::is_fixed_point<Lhs>::value || _impl::is_fixed_point<Rhs>::value);
+		}
+	}
 
+	namespace _impl {
+		template<class Operator,class Lhs,int Exponent,class Rhs,class = _impl::enable_if_t<Operator::is_comparison && std::numeric_limits<Rhs>::is_specialized>>
+		constexpr auto operate(const fixed_point<Lhs,Exponent>& lhs,const Rhs& rhs,Operator op)
+		-> decltype(op(lhs,static_cast<fixed_point<Lhs,Exponent>>(rhs))) {
+			return op(lhs,static_cast<fixed_point<Lhs,Exponent>>(rhs));
+		}
+
+		template<class Operator,class Lhs,class Rhs,int Exponent,class = _impl::enable_if_t<Operator::is_comparison && std::numeric_limits<Lhs>::is_specialized>>
+		constexpr auto operate(const Lhs& lhs,const fixed_point<Rhs,Exponent>& rhs,Operator op)
+		-> decltype(op(static_cast<fixed_point<Rhs,Exponent>>(lhs),rhs)) {
+			return (op(static_cast<fixed_point<Rhs,Exponent>>(lhs),rhs));
+		}
+
+		template<class Operator,class Rep,int Exponent,class = _impl::enable_if_t<Operator::is_comparison>>
+		constexpr auto operate(const fixed_point<Rep,Exponent>&lhs,const fixed_point<Rep,Exponent>& rhs,Operator op) 
+		-> decltype(op(lhs.data(),rhs.data())){
+			return op(lhs.data(),rhs.data());
+		}
+	}
 
 	// fixed_point @ non_fixed_point arithmetic operators
 	// fixed_point ,integer -> fixedpoint
@@ -177,7 +206,18 @@ namespace sg14 {
     ////////////////////////////////////////////////////////////////////////////////
     // shift operators
 	//
-	// FIXME
+	// 
+	template<class LhsRep,int LhsExponent,class Rhs>
+	constexpr auto operator <<(const fixed_point<LhsRep,LhsExponent>& lhs,const Rhs& rhs)
+	-> decltype(_impl::from_rep<fixed_point<decltype(lhs.data() << rhs), LhsExponent>>(lhs.data() << rhs)) {
+		return _impl::from_rep<fixed_point<decltype(lhs.data() << rhs), LhsExponent>>(lhs.data() << rhs);
+	}
+
+	template<class LhsRep, int LhsExponent, class Rhs>
+	constexpr auto operator>>(const fixed_point<LhsRep, LhsExponent>& lhs, const Rhs& rhs)
+	-> decltype(_impl::from_rep<fixed_point<decltype(lhs.data() >> rhs), LhsExponent>>(lhs.data() >> rhs)) {
+		return _impl::from_rep<fixed_point<decltype(lhs.data() >> rhs), LhsExponent>>(lhs.data() >>rhs);
+	}
 }
 
 #endif
