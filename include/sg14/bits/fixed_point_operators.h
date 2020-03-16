@@ -79,8 +79,8 @@ namespace sg14 {
 
 	template<class LhsRep,int LhsExponent,class RhsInteger,typename = _impl::enable_if_t<std::numeric_limits<RhsInteger>::is_integer>>
 	constexpr auto operator / (const fixed_point<LhsRep,LhsExponent>&lhs,const RhsInteger& rhs)
-	-> decltype(lhs / fixed_point<LhsRep,0>{rhs}) {
-		return lhs / fixed_point<LhsRep,0>{rhs};
+	-> decltype(lhs / fixed_point<LhsRep,LhsExponent>{rhs}) {
+		return lhs / fixed_point<LhsRep,LhsExponent>{rhs};
 	}
 
 	// integer,fixed_point -> fixed_point
@@ -104,8 +104,8 @@ namespace sg14 {
 
 	template<class LhsInteger,class RhsRep,int RhsExponent,typename = _impl::enable_if_t<std::numeric_limits<LhsInteger>::is_integer>>
 	constexpr auto operator/(const LhsInteger& lhs,const fixed_point<RhsRep,RhsExponent>& rhs)
-	-> decltype(fixed_point<RhsRep,RhsExponent>{lhs} / fixed_point<RhsRep,0>{rhs}) {
-		return fixed_point<RhsRep, RhsExponent>{lhs} / fixed_point<RhsRep,0>{rhs};
+	-> decltype(fixed_point<RhsRep,RhsExponent>{lhs} / fixed_point<RhsRep,RhsExponent>{rhs}) {
+		return fixed_point<RhsRep, RhsExponent>{lhs} / fixed_point<RhsRep,RhsExponent>{rhs};
 	}
 
 	// fixed-point, floating-point -> floating-point
@@ -128,8 +128,7 @@ namespace sg14 {
             const RhsFloat& rhs)
     -> _impl::common_type_t<fixed_point<LhsRep, LhsExponent>,_impl::enable_if_t<std::is_floating_point<RhsFloat>::value, RhsFloat>>
     {
-        using result_type = _impl::common_type_t<fixed_point<LhsRep, LhsExponent>, RhsFloat>;
-        return static_cast<result_type>(lhs)*rhs;
+        return lhs * fixed_point<LhsRep, LhsExponent>(rhs);
     }
 
     template<class LhsRep, int LhsExponent, class RhsFloat>
@@ -138,8 +137,7 @@ namespace sg14 {
             const RhsFloat& rhs)
     -> _impl::common_type_t<fixed_point<LhsRep, LhsExponent>,_impl::enable_if_t<std::is_floating_point<RhsFloat>::value, RhsFloat>>
     {
-        using result_type = _impl::common_type_t<fixed_point<LhsRep, LhsExponent>, RhsFloat>;
-        return static_cast<result_type>(lhs)/rhs;
+        return lhs / fixed_point<LhsRep, LhsExponent>(rhs);
     }
 
 
@@ -164,8 +162,7 @@ namespace sg14 {
             const fixed_point<RhsRep, RhsExponent>& rhs)
     -> _impl::common_type_t <_impl::enable_if_t<std::is_floating_point<LhsFloat>::value, LhsFloat>, fixed_point<RhsRep, RhsExponent>>
     {
-        using result_type = _impl::common_type_t<fixed_point<RhsRep, RhsExponent>, LhsFloat>;
-        return lhs*static_cast<result_type>(rhs);
+        return fixed_point<RhsRep, RhsExponent>(lhs) * rhs;
     }
 
     template<class LhsFloat, class RhsRep, int RhsExponent>
@@ -174,9 +171,7 @@ namespace sg14 {
             const fixed_point<RhsRep, RhsExponent>& rhs)
     -> _impl::common_type_t <_impl::enable_if_t<std::is_floating_point<LhsFloat>::value, LhsFloat>, fixed_point<RhsRep, RhsExponent>>
     {
-        using result_type = _impl::common_type_t<fixed_point<RhsRep, RhsExponent>, LhsFloat>;
-        return lhs/
-                static_cast<result_type>(rhs);
+        return fixed_point<RhsRep, RhsExponent>(lhs) / rhs;
     }
 
     ////////////////////////////////////////////////////////////////////////////////

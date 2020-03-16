@@ -3,7 +3,8 @@
 //数字拆分为低位和高位 eg 64-32,32
 
 #include <sg14/num_traits.h>
-//#include <sg14/num_utils.h>
+#include <sg14/bits/number_utils.h>
+#include <tuple>
 
 namespace sg14 {
 	//namespace _impl {
@@ -58,8 +59,15 @@ namespace sg14 {
 
 		template<class Rep>
 		number_split<Rep> number_split<Rep>::operator / (const number_split<Rep>& rhs) const {
-			Rep new_rep = this->get_data() / rhs.get_data();
-			return number_split<Rep>(new_rep);
+			using unsigned_rep = typename _num_traits_impl::set_digits_unsigned<std::numeric_limits<Rep>::digits>::type;
+			bool f_signed = this->_high >= 0;
+			bool s_signed = rhs._high >= 0;
+			bool is_signed = f_signed ^ s_signed;
+			unsigned_rep dividened = static_cast<unsigned_rep>(this->get_data());
+			unsigned_rep divisor = static_cast<unsigned_rep>(rhs.get_data());
+			unsigned_rep result = 0,tmp1 = 0,tmp2 = 0;
+			std::tie(result,tmp1,tmp2) = shifted_div(dividened,divisor);
+			return number_split<Rep>(static_cast<Rep>(result) * (is_signed ? -1 : 1));
 		}
 
 		template<class Rep>
@@ -70,19 +78,24 @@ namespace sg14 {
 
 		template<class Rep>
 		number_split<Rep> number_split<Rep>::operator *(const number_split<Rep>& rhs) const {
-			Rep t0 = static_cast<Rep>(this->_low) * rhs._low;
-			Rep t1 = static_cast<Rep>(this->_high) * rhs._low;
-			Rep t2 = static_cast<Rep>(this->_low) * rhs._high;
-			Rep t3 = static_cast<Rep>(this->_high) * rhs._high;
+			bool nneg_ = this->_high < 0, dneg_ = rhs._high < 0;
+			bool is_negative = nneg_ ^ dneg_;
+
+			using unsigned_rep = typename _num_traits_impl::set_digits_unsigned<std::numeric_limits<Rep>::digits>::type;
+
+			unsigned_rep t0 = static_cast<unsigned_rep>(this->_low) * rhs._low;
+			unsigned_rep t1 = static_cast<unsigned_rep>(this->_high) * rhs._low;
+			unsigned_rep t2 = static_cast<unsigned_rep>(this->_low) * rhs._high;
+			unsigned_rep t3 = static_cast<unsigned_rep>(this->_high) * rhs._high;
 			
 			int digitval = std::numeric_limits<lowrep>::digits;
 			lowrep digitmax = std::numeric_limits<lowrep>::max();
-			Rep u1 = t1 + (t0 >> digitval);
-			Rep u2 = t2 + (u1 & digitmax);
-			Rep low = (u2 << digitval) | (t0 & digitmax);
-			Rep high = t3 + (u2 >> digitval) + (u1 >> digitval);
-			Rep result = ((high & digitmax) << digitval) | (low >> digitval);
-			return number_split<Rep>(result);
+			unsigned_rep u1 = t1 + (t0 >> digitval);
+			unsigned_rep u2 = t2 + (u1 & digitmax);
+			unsigned_rep low = (u2 << digitval) | (t0 & digitmax);
+			unsigned_rep high = t3 + (u2 >> digitval) + (u1 >> digitval);
+			Rep result = static_cast<Rep>(((high & digitmax) << digitval) | (low >> digitval));
+			return number_split<Rep>(is_negative ? -result : result);
 		}
 			
 	//}
