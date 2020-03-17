@@ -45,7 +45,24 @@ namespace sg14 {
     struct from_value<fixed_point<Rep, Exponent>, Value> {
         using type = fixed_point<Value>;
 	};
+	
 
+	/// \brief calculates the square root of a \ref fixed_point value
+	//  /// \headerfile sg14/fixed_point
+	//  ///
+	//  /// \param x input parameter
+	//  ///
+	//  /// \return square root of x
+	//  ///
+	/// \note This function is a placeholder implementation with poor run-time performance ch
+	//  aracteristics.
+	//  /// \note It uses
+	//  /// divides the values
+	//  /// without performing any additional scaling or conversion.
+	//  ///
+	//  /// \sa negate, add, subtract, multiply
+	//
+	//  ps://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Binary_numeral_system_.28base_2.29
 	template<class Rep, int Exponent>
 	fixed_point<Rep,Exponent> sqrt(const fixed_point<Rep,Exponent>& src) {
 		Rep data = src.data();
