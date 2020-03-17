@@ -45,6 +45,31 @@ namespace sg14 {
     struct from_value<fixed_point<Rep, Exponent>, Value> {
         using type = fixed_point<Value>;
 	};
+
+	template<class Rep, int Exponent>
+	fixed_point<Rep,Exponent> sqrt(const fixed_point<Rep,Exponent>& src) {
+		Rep data = src.data();
+		if (src <= 0) 
+			return fixed_point<Rep, Exponent>::from_data(0);
+		Rep result = 0;
+		Rep bit = static_cast<Rep>(1) << ((std::numeric_limits<Rep>::digits + std::numeric_limits<Rep>::is_signed) - 2);
+
+		while (bit > data) 
+			bit >>= 2;
+
+		while(bit != 0) {
+			if (data >= result + bit) {
+				data -= result + bit;
+				result = (result >> 1) + bit;
+			}
+			else
+				result >>= 1;
+			bit >>= 2;
+		}
+		using highrep = typename _num_traits_impl::set_digits_integer<Rep,std::numeric_limits<Rep>::digits / 2>::type;
+		return static_cast<fixed_point<Rep,Exponent>>(fixed_point<highrep, Exponent / 2>::from_data(result));
+	}
+
 }
 
 
