@@ -87,6 +87,35 @@ namespace sg14 {
 		return static_cast<fixed_point<Rep,Exponent>>(fixed_point<highrep, Exponent / 2>::from_data(result));
 	}
 
+	namespace _impl {
+		template<class Rep,int Exponent,_impl::fp::float_of_same_size<Rep>(*F)(_impl::fp::float_of_same_size<Rep>)>
+		constexpr fixed_point<Rep,Exponent>
+		crib(const fixed_point<Rep,Exponent>& x) noexcept {
+			using floating_point = _impl::fp::float_of_same_size<Rep>;
+			return static_cast<fixed_point<Rep,Exponent>>(F(static_cast<floating_point>(x)));
+		}
+	}
+
+    template<class Rep, int Exponent>
+    constexpr fixed_point <Rep, Exponent>
+    sin(const fixed_point <Rep, Exponent>& x) noexcept
+    {
+        return _impl::crib<Rep, Exponent, std::sin>(x);
+    }
+
+    template<class Rep, int Exponent>
+    constexpr fixed_point <Rep, Exponent>
+    cos(const fixed_point <Rep, Exponent>& x) noexcept
+    {
+        return _impl::crib<Rep, Exponent, std::cos>(x);
+    }
+
+    template<class Rep, int Exponent>
+    constexpr fixed_point <Rep, Exponent>
+    tan(const fixed_point <Rep, Exponent>& x) noexcept
+    {
+        return _impl::crib<Rep, Exponent, std::tan>(x);
+    }
 }
 
 
