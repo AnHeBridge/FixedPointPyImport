@@ -63,8 +63,8 @@ namespace sg14 {
 			bool f_signed = this->_high >= 0;
 			bool s_signed = rhs._high >= 0;
 			bool is_signed = f_signed ^ s_signed;
-			unsigned_rep dividened = static_cast<unsigned_rep>(this->get_data());
-			unsigned_rep divisor = static_cast<unsigned_rep>(rhs.get_data());
+			unsigned_rep dividened = static_cast<unsigned_rep>(std::abs(this->get_data()));
+			unsigned_rep divisor = static_cast<unsigned_rep>(std::abs(rhs.get_data()));
 			unsigned_rep result = 0,tmp1 = 0,tmp2 = 0;
 			std::tie(result,tmp1,tmp2) = shifted_div(dividened,divisor);
 			return number_split<Rep>(static_cast<Rep>(result) * (is_signed ? -1 : 1));

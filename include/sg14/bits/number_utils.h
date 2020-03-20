@@ -94,7 +94,7 @@ namespace sg14 {
 		int half_digits = digits / 2;
 
 		if ((b & (b - 1)) == 0) {
-			small_int shamt = half_digits - 1  - clz(b);
+			int shamt = half_digits - 1  - clz(b);
 			if (shamt >= 0) 
 				return std::make_tuple(a >> shamt, static_cast<Integer>(0), a & ((1 << shamt) - 1));
 			else 
