@@ -116,6 +116,16 @@ namespace sg14 {
     {
         return _impl::crib<Rep, Exponent, std::tan>(x);
     }
+
+	////////////////////////////////////////////////////////////////////////////////
+	//// sg14::abs
+	//
+	template<class Rep, int Exponent>
+	constexpr auto abs(const fixed_point<Rep, Exponent>& x) noexcept
+	-> decltype(-x) {
+	    return (x >= 0) ? static_cast<decltype(-x)>(x) : -x;
+	}
+	
 }
 
 

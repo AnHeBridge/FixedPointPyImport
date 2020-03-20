@@ -1,7 +1,6 @@
 #include <sg14/fixed_point>
 #include "gtest/gtest.h"
 #include <limits>
-#include <iostream>
 
 TEST(fixed_op,fixed_add) {
 	sg14::fixed_point<> value = sg14::fixed_point<>{1000};
