@@ -7,12 +7,10 @@ set(build_dir ${CMAKE_CURRENT_LIST_DIR}/build)
 
 message(STATUS "BUILDDIR " ${build_dir})
 message(STATUS "PROJECT_SOURCE_DIR" ${PROJECT_SOURCE_DIR})
-message(STATUS "PROJECT_BINARY_DIR" ${PROJECT_BINARY_DIR})
 
 enable_testing()
-add_executable(Fixed test.cpp)
+#add_executable(Fixed test.cpp)
 find_package(Threads REQUIRED)
-
 
 if (gtest_build_samples)
 

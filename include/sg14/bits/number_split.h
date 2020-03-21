@@ -27,7 +27,8 @@ namespace sg14 {
 			number_split operator * (const number_split& rhs) const;
 			number_split operator / (const number_split& rhs) const;
 			explicit constexpr operator bool() const;
-
+			highrep constexpr get_high() const { return _high ;}
+			lowrep constexpr get_low() const { return _low; }
 
 		private :
 			lowrep _low;
