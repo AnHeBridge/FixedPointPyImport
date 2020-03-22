@@ -13,7 +13,7 @@ Support basic arithmetic operations(+-*/,sqrt,sin ....etc), view details from te
 The library is [hosted](https://github.com/johnmcfarlane/fixed_point) on GitHub:
 
 ```shell
-$ git https://github.com/AnHeBridge/fixed_point.git
+$ git clone https://github.com/AnHeBridge/fixed_point.git
 ```
 
 The API is exposed through headers in the [include](./include/) directory. Add this to your system header list and include, e.g.:
