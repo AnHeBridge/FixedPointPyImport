@@ -9,7 +9,6 @@ message(STATUS "BUILDDIR " ${build_dir})
 message(STATUS "PROJECT_SOURCE_DIR" ${PROJECT_SOURCE_DIR})
 
 enable_testing()
-#add_executable(Fixed test.cpp)
 find_package(Threads REQUIRED)
 
 if (gtest_build_samples)

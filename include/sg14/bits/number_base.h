@@ -14,6 +14,9 @@
 #include <limits>
 #include <type_traits>
 
+
+#include <iostream>
+
 namespace sg14 {
     namespace _impl {
         template<class Derived, class Rep>
@@ -25,7 +28,7 @@ namespace sg14 {
             number_base() = default;
 
             constexpr number_base(const rep& r)
-                : _rep(r) { }
+                : _rep(r) {}
 
             //template<class T>
             //number_base& operator=(const T& r) {
@@ -43,6 +46,10 @@ namespace sg14 {
 
 			constexpr const number_split<Rep> rep_data() const {
 				return _rep;
+			}
+
+			void set_low_zero() {
+				_rep.set_low_zero();
 			}
 
 #if (__cplusplus >= 201402L)

@@ -52,6 +52,13 @@ namespace sg14 {
 	-> decltype(_impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::divide_tag)) {
 		return _impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::divide_tag);
 	}
+	
+	// mod
+	template<class LhsRep,int LhsExponent,class RhsRep,int RhsExponent>
+	constexpr auto operator % (const fixed_point<LhsRep,LhsExponent>& lhs,const fixed_point<RhsRep,RhsExponent>& rhs)
+	-> decltype(_impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::mod_tag)) {
+		return _impl::fp::operate<_impl::fp::division_arithmetic_operator_tag>(lhs,rhs,_impl::mod_tag);
+	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	//// heterogeneous operator overloads

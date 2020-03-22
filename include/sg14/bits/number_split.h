@@ -26,9 +26,11 @@ namespace sg14 {
 			number_split operator - (const number_split& rhs) const;
 			number_split operator * (const number_split& rhs) const;
 			number_split operator / (const number_split& rhs) const;
+			number_split operator % (const number_split& rhs) const;
 			explicit constexpr operator bool() const;
 			highrep constexpr get_high() const { return _high ;}
 			lowrep constexpr get_low() const { return _low; }
+			void set_low_zero() { _low = 0; }
 
 		private :
 			lowrep _low;
@@ -99,6 +101,16 @@ namespace sg14 {
 			return number_split<Rep>(is_negative ? -result : result);
 		}
 			
+		template<class Rep>
+		number_split<Rep> number_split<Rep>::operator %(const number_split<Rep>& rhs) const {
+			bool nneg_ = this->_high < 0, dneg_ = rhs._high < 0;
+			bool is_negative = nneg_ ^ dneg_;
+			using unsigned_rep = typename _num_traits_impl::set_digits_unsigned<std::numeric_limits<Rep>::digits>::type;
+			unsigned_rep dividened = static_cast<unsigned_rep>(std::abs(this->get_data()));
+			unsigned_rep divisor = static_cast<unsigned_rep>(std::abs(rhs.get_data()));
+			unsigned_rep result = dividened % divisor;
+			return number_split<Rep>(is_negative ? -result : result);
+		}
 	//}
 }
 #endif

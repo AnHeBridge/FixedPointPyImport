@@ -70,6 +70,9 @@ namespace sg14 {
 				template<class Lhs,class Rhs>
 				struct rep_op_exponent<_impl::divide_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent,Rhs::exponent)> {};
 
+				template<class Lhs,class Rhs>
+				struct rep_op_exponent<_impl::mod_op,Lhs,Rhs> : public std::integral_constant<int,_impl::max<int>(Lhs::exponent,Rhs::exponent)> {};
+
 				// sg14::_impl::fp::arithmetic::result
 				template<class PolicyTag,class OperationTag,class Lhs,class Rhs>
 				struct result;
@@ -150,6 +153,9 @@ namespace sg14 {
 					using lhs_type = fixed_point<rep_type,exponent>;
 					using rhs_type = Rhs;
 				};
+
+				template<class Lhs,class Rhs>
+				struct intermediate<wide_tag,_impl::mod_op,Lhs,Rhs> : public intermediate<wide_tag,_impl::divide_op,Lhs,Rhs> {};
 					
 
 				//sg14::_impl::fp:arithmetic::operator_params	
@@ -176,7 +182,7 @@ namespace sg14 {
 			using division_arithmetic_operator_tag = arithmetic::wide_tag;
 
 			template <class PolicyTag, class Operation,class Lhs,class Rhs>
-			const auto operate(const Lhs& lhs,const Rhs& rhs,Operation) 
+			constexpr auto operate(const Lhs& lhs,const Rhs& rhs,Operation) 
 			-> typename arithmetic::operate_params<PolicyTag,Operation,Lhs,Rhs>::result_type {
 				using params = arithmetic::operate_params<PolicyTag,Operation,Lhs,Rhs>;
 				using intermediate_lhs = typename params::intermediate_lhs;
@@ -184,14 +190,10 @@ namespace sg14 {
 				using result_type = typename params::result_type;
 				using result_rep = typename result_type::rep;
 
-				auto lhs_data_type = static_cast<intermediate_lhs>(lhs);
-				auto lhs_data = lhs_data_type.rep_data();
-				auto rhs_data_type = static_cast<intermediate_rhs>(rhs);
-				auto rhs_data = rhs_data_type.rep_data();
-
-				auto result_data = static_cast<result_rep>(Operation()(lhs_data,rhs_data).get_data());
-
-				return result_type::from_data(result_data);
+				return result_type::from_data(static_cast<result_rep>(
+							Operation()
+							( static_cast<intermediate_lhs>(lhs).rep_data(),static_cast<intermediate_rhs>(rhs).rep_data() ).get_data()
+						));
 			};
 		}
 	}

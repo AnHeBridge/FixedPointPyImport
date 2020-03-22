@@ -12,6 +12,7 @@
 
 #include <sg14/bits/number_base.h>
 #include <sg14/bits/type_traits.h>
+#include <iostream>
 
 // study group 14 of the c++ working group
 namespace sg14 {
@@ -90,6 +91,8 @@ namespace sg14 {
 	public :
         /// default constructor
         constexpr fixed_point() : _base() { }
+		
+		~fixed_point() {}
 
         /// constructor taking a fixed-point type
         template<class FromRep, int FromExponent>

@@ -94,6 +94,14 @@ namespace sg14 {
             }
         };
 
+        struct mod_op : arithmetic_op {
+            template<class Lhs, class Rhs>
+            constexpr auto operator()(const Lhs& lhs, const Rhs& rhs) const -> decltype(lhs/rhs)
+            {
+                return lhs % rhs;
+            }
+        };
+
         struct bitwise_or_op : arithmetic_op {
             template<class Lhs, class Rhs>
             constexpr auto operator()(const Lhs& lhs, const Rhs& rhs) const -> decltype(lhs|rhs)
@@ -173,6 +181,7 @@ namespace sg14 {
         static constexpr subtract_op subtract_tag {};
         static constexpr multiply_op multiply_tag {};
         static constexpr divide_op divide_tag {};
+		static constexpr mod_op mod_tag{};
 
         static constexpr bitwise_or_op bitwise_or_tag {};
         static constexpr bitwise_and_op bitwise_and_tag {};
