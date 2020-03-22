@@ -6,7 +6,7 @@
 This library base on (https://github.com/johnmcfarlane/fixed_point) library .
 provide a header-only C++11 API for approximating real numbers using binary fixed-point arithmetic and build python extension.**There are still some constant efficiencies to be optimized。**
 This project split number to low,high ,and do not need int128 support.
-this support basic arithmetic operations(+-*/,sqrt,sin ....etc), view details from test.
+Support basic arithmetic operations(+-*/,sqrt,sin ....etc), view details from test.
 
 ## Download
 
