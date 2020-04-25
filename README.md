@@ -10,7 +10,6 @@ Support basic arithmetic operations(+-*/,sqrt,sin ....etc), view details from te
 
 ## Download
 
-The library is [hosted](https://github.com/johnmcfarlane/fixed_point) on GitHub:
 
 ```shell
 $ git clone https://github.com/AnHeBridge/fixed_point.git
